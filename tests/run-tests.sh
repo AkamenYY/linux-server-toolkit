@@ -50,6 +50,34 @@ if [ -x "$REPO_ROOT/scripts/sysinfo.sh" ]; then
 fi
 
 echo
+echo "5. Защита от потери данных в backup.sh"
+if [ -x "$REPO_ROOT/scripts/backup.sh" ]; then
+    # Срок хранения 0 означал бы удаление только что созданного архива.
+    # Скрипт обязан завершиться с ненулевым кодом.
+    if BACKUP_RETENTION_DAYS=0 BACKUP_SOURCES="$REPO_ROOT/docs" \
+       bash "$REPO_ROOT/scripts/backup.sh" --dry-run >/dev/null 2>&1; then
+        bad "backup.sh принял BACKUP_RETENTION_DAYS=0 (риск потери данных)"
+    else
+        ok "backup.sh отвергает BACKUP_RETENTION_DAYS=0"
+    fi
+
+    if BACKUP_RETENTION_DAYS=abc BACKUP_SOURCES="$REPO_ROOT/docs" \
+       bash "$REPO_ROOT/scripts/backup.sh" --dry-run >/dev/null 2>&1; then
+        bad "backup.sh принял нечисловой BACKUP_RETENTION_DAYS"
+    else
+        ok "backup.sh отвергает нечисловой BACKUP_RETENTION_DAYS"
+    fi
+
+    if BACKUP_RETENTION_DAYS=7 BACKUP_SOURCES="$REPO_ROOT/docs" \
+       BACKUP_DEST="/tmp/toolkit-test-$$" \
+       bash "$REPO_ROOT/scripts/backup.sh" --dry-run >/dev/null 2>&1; then
+        ok "backup.sh принимает корректный BACKUP_RETENTION_DAYS=7"
+    else
+        bad "backup.sh отверг корректное значение 7"
+    fi
+fi
+
+echo
 echo "=================================="
 echo "Пройдено: $PASS   Провалено: $FAIL"
 echo "=================================="
