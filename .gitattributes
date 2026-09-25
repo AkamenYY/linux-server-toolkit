@@ -1,0 +1,15 @@
+# Нормализация переводов строк: в репозитории всегда LF.
+# Это спасает от "весь файл изменился" при работе с Windows-машин.
+* text=auto eol=lf
+
+# Shell-скрипты обязаны иметь LF, иначе Linux не сможет их выполнить
+# (ошибка вида: /bin/bash^M: bad interpreter)
+*.sh    text eol=lf
+*.conf  text eol=lf
+*.md    text eol=lf
+
+# Бинарные файлы не диффать и не нормализовать
+*.png   binary
+*.jpg   binary
+*.gz    binary
+*.tar   binary
